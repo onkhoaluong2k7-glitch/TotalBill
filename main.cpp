@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <fstream>
 using namespace std;
 
 
@@ -78,6 +79,7 @@ public:
         NewFood->next = head;
         head = NewFood;
     }
+    // giam/ xoa mon an trong bill
     void RemoveFood(int Id){
         if (head == nullptr) return;
         // Truong hop mon an nam ngay o dau
@@ -93,7 +95,7 @@ public:
         // Truong hop mon an nam o giua
         Node* temp = head;
         Node* prev = nullptr;
-        while (temp != nullptr && temp->data.GetID() == Id){
+        while (temp != nullptr && temp->data.GetID() != Id){
             prev = temp;
             temp = temp->next;
         }
@@ -108,6 +110,8 @@ public:
         }else{
             cout << "Khong tim thay mon an co ID: " << Id << " de xoa!" << endl; 
         }
+
+        return;
     }
     // Calculate the bill
     long TotalBill(){
@@ -121,6 +125,7 @@ public:
         
         return total;
     }
+    // In hoa don
     void PrintBill(){
         if (head == nullptr){
             cout << "Order dang trong!!" << endl;
@@ -143,18 +148,6 @@ public:
         cout << "TONG CONG :" << TotalBill() <<" VND " << endl;
         cout << "-----------------------------------------------------------------" << endl;
     }
-    void HienThiMenu(){
-        cout << "======================== Menu ========================" << endl;
-        cout << left << setw(5) << "ID" 
-             << setw(20) << "Ten Mon" 
-             << setw(15) << "Don Gia" << endl;
-        Node* temp = head;
-        while (temp != nullptr){
-            temp->data.ShowFoodinMenu();
-            temp = temp->next;
-        }
-        
-    }
     // Delete the bill
     ~Order(){
         while (head != nullptr){
@@ -164,22 +157,166 @@ public:
         }
     }
 };
+// Menu cua nha hang
+class Menu{
+private:
+    Node* head;
+public:
+    Menu(){head = nullptr;}
+    
+    // Them mon an moi vao menu
+    void AddtoMenu(Item newItem){
+        Node* temp = head;
+        while(temp != nullptr ){
+            if (temp->data.GetID() != newItem.GetID()) return;
+            temp = temp->next;
+        }
+        
+        Node* newNode = new Node(newItem);
+        newNode->next = head;
+        head = newNode;
+
+        return;
+    }
+    //Load du lieu menu tu file.
+    void LoadMenufromFile(string filename){
+        ifstream file(filename);
+        if (!file.is_open()){
+            cout << "Khong tim thay file: "<< filename << endl;
+            return;
+        }
+        int id;
+        string name;
+        long gia;
+        while(file >> id >> name >> gia){
+            Item newItem(id, name, gia);
+            AddtoMenu(newItem);
+        }
+        file.close();                                                                                                   
+    }
+    // Hien thi menu 
+    void PrintMenu(){
+        cout << "======================== Menu Nha Hang ========================" << endl;
+        cout << left << setw(5) << "ID" 
+            << setw(20) << "Ten Mon" 
+            << setw(15) << "Don Gia" << endl;
+        Node* temp = head;
+        while( temp != nullptr){
+            temp->data.ShowFoodinMenu();
+            temp = temp->next;
+        }
+        return;
+    }
+    // Admin them mon moi vao data
+    void Admin_themon(){
+        int id;
+        string name;
+        long gia;
+        cout << "\nThem mon moi vao thuc don:" << endl;
+        cout << "Vui long nhap ID: "; cin >> id;
+        cin.ignore();
+        cout << "Nhap ten nhom (vui long thay dau cach bang dau \"_\"): "; getline(cin, name);
+        cout << "Nhap gia: "; cin >> gia;
+        // them vao menu tren man hinh
+        Item newItem(id, name, gia);
+        AddtoMenu(newItem);
+        // them vao menu trong data
+        SaveMenutoFile("Menu.txt");
+        cout << " Them mon thanh cong! " << endl;
+    }
+    // luu du lieu vao file menu.txt
+    void SaveMenutoFile(string filename){
+        ofstream file(filename);
+        if (!file.is_open()) return;
+
+        Node* temp = head;
+        while( temp != nullptr){
+            // ghi file theo dinh dang
+            file << temp->data.GetID() << " "
+            << temp->data.GetTen() << " "
+            << temp->data.GetGia() << endl;
+            temp = temp->next;
+        }
+        file.close();
+    }
+    // Tim mon an theo ID
+    Item* GetItembyId(int id){
+        Node* temp = head;
+
+        while (temp != nullptr && temp->data.GetID() != id){
+            temp = temp->next;
+        }
+
+        if (temp == nullptr) return nullptr;
+        return &(temp->data);
+    }
+};
+
 
 // Main 
 int main(){
     Order Bill;
+    Menu nhahang;
+    nhahang.LoadMenufromFile("Menu.txt");
+    int option;
+    do{
+        cout << "\n1. Xem Menu nha hang."
+        << "\n2. Chon mon an."
+        <<"\n3.Xoa mon / giam so luong."
+        <<"\n4. In hoa don. "
+        <<"\n0. Thoat bang chon."
+        <<"\nChon: ";
+        cin >> option;
+        switch (option){
+            case 1:{
+                nhahang.PrintMenu();
+                break;
+            }
+            case 2:{
+                int opt;
+                cout << "Nhap ID mon an: ";
+                cin >> opt;
+                Item*  found = nhahang.GetItembyId(opt);
+                if (found != nullptr){
+                    Bill.AddFood(*found);
+                } else {
+                    cout << " Khong tim thay mon an.";
+                }
+                break;
+            }
+            case 3:{
+                int opt;
 
-    // Giả sử Menu có những món này
-    Item trasua(1, "Tra Sua Chan Chau", 35000);
-    Item cafe(2, "Cafe Sua Da", 25000);
-    Item BanhMi(3, "Banh Mi Sai Gon", 30000);
+                cout << "Vui long nhap mon an:";
+                cin >> opt;
+                Bill.RemoveFood(opt);
+                break;
+            }
+            case 4:{
+                Bill.PrintBill();
+                break;
+            }
+            case 101:{
+                string pass;
 
-    Bill.AddFood(trasua);
-    Bill.AddFood(trasua);
-    Bill.AddFood(cafe);
-    Bill.AddFood(BanhMi);
-    Bill.HienThiMenu();
-    // In hoa don
-    Bill.PrintBill();
+                cout << "Vui long nhap mat khau: ";
+                cin >> pass;
+
+                if (pass == "oklpassmenu"){
+                    nhahang.Admin_themon();
+                } else {
+                    cout << "Mat khau sai!" << endl;
+                }
+                break;
+            }
+            case 0:
+                cout << "Cam on quy khach. Dang thoat ..." << endl;
+                break;
+            default:
+                cout << "Lua chon khong phu hop!!!" << endl;
+        }
+    }while (option != 0);
+
+
     return 0;
 }

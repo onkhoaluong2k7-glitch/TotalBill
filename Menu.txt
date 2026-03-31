@@ -1,0 +1,4 @@
+1 Tra_Sua_Tran_Chau 35000
+2 Cafe_Sua_Da 25000
+3 Banh_Mi_Sai_Gon 30000
+4 Nuoc_Cam_Ep 20000

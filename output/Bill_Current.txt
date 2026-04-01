@@ -1,0 +1,10 @@
+================ HOA DON KHACH HANG ================
+ID   Ten                 SL      ThanhTien   
+4    Nuoc_Cam_Ep         2       40000       
+3    Banh_Mi_Sai_Gon     1       30000       
+2    Cafe_Sua_Da         2       50000       
+1    Tra_Sua_Tran_Chau   2       70000       
+-----------------------------------------------------------
+                                  TONG CONG: 190000 VND
+===========================================================
+            Cam on quy khach - Hen gap lai!                

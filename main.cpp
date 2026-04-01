@@ -2,6 +2,7 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
+#include <ctime>
 using namespace std;
 
 
@@ -13,23 +14,31 @@ private:
     string ten;
     long gia; 
     int soluong;
+    string note;
 
 public:
     // Hàm khởi tạo 
-    Item(int id = 0, string ten = "", long gia = 0, int soluong = 0){
+    Item(int id = 0, string ten = "", long gia = 0, int soluong = 0, string note = ""){
         this->id = id;
         this->ten = ten;
         this->gia = gia > 0 ? gia : 0;
         this->soluong = soluong > 0? soluong : 1;
+        this->note = note;
     }
+    //Hàm lấy và sửa thông tin ghi chú
+    string GetNote(){return note;}
+    void SetNote(string text) { this->note = text;} 
+
     // Hàm giá lấy các giá trị
     int GetID(){return id;}
     string GetTen(){return ten;}
     long GetGia(){return gia;}
     int GetSoluong(){return soluong;}
+
     // Hàm tăng/ giảm giá số lượng
     void IncreaseFood(){soluong++;}
     void DecreaseFood(){if (soluong >= 1) soluong--;}
+
     // Hàm tính tiền
     long Value(){
         return gia*soluong;
@@ -41,12 +50,16 @@ public:
              << setw(10) << soluong 
              << setw(15) << gia 
              << setw(15) << Value() << endl;
+        if (!note.empty()){
+            cout << "      [Ghi chu: " << note << "]" << endl;
+        }
     }
     //Ham hien thi mon an tren menu
     void ShowFoodinMenu(){
         cout << left << setw(5) << id 
              << setw(20) << ten 
              << setw(15) << gia  << endl;
+
     }
 };
 
@@ -132,23 +145,59 @@ public:
             return;
         }
 
-        cout << "========================HOA DON TINH TAM========================" << endl;
+        cout << "\n===========================================================" << endl;
+        cout << "                     HOA DON THANH TOAN                    " << endl;
+        cout << "===========================================================" << endl;
         cout << left << setw(5) << "ID" 
              << setw(20) << "Ten Mon" 
              << setw(10) << "SL" 
              << setw(15) << "Don Gia" 
              << setw(15) << "Thanh Tien" << endl;
-        cout << "----------------------------------------------------------------" << endl;
+        cout << "-----------------------------------------------------------" << endl;
+        
         Node* temp = head;
         while (temp != nullptr){
             temp->data.ShowFood();
             temp = temp->next;
         }
-        cout << "-----------------------------------------------------------------" << endl;
-        cout << "TONG CONG :" << TotalBill() <<" VND " << endl;
-        cout << "-----------------------------------------------------------------" << endl;
+        cout << "-----------------------------------------------------------" << endl;
+        cout << right << setw(45) << "TONG CONG: " << TotalBill() << " VND" << endl;
+        cout << "===========================================================" << endl;
+        cout << "            Cam on quy khach - Hen gap lai!                " << endl;
     }
+    void ExportBillToFile(){
+        string FileName = "Bill_Current.txt";
+        ofstream file(FileName, ios::app);
+        if (!file.is_open()) return;
+        
+        file << "================ HOA DON KHACH HANG ================\n";
+        file << left << setw(5) << "ID" << setw(20) << "Ten" << setw(8) << "SL" << setw(12) << "ThanhTien"<<endl;
+
+        Node* temp = head;
+        while(temp != nullptr){
+            file << left << setw(5) << temp->data.GetID() 
+                << setw(20) << temp->data.GetTen() 
+                << setw(8) << temp->data.GetSoluong()
+                << setw(12) << temp->data.Value() << endl;
+            temp = temp->next;
+        }
+        file << "-----------------------------------------------------------" << endl;
+        file << right << setw(45) << "TONG CONG: " << TotalBill() << " VND" << endl;
+        file << "===========================================================" << endl;
+        file << "            Cam on quy khach - Hen gap lai!                " << endl;
+        file.close();
+        cout << "Da xuat hoa don ra file: " << FileName << endl;
+    }
+
     // Delete the bill
+    void ResetOrder(){
+        while (head != nullptr){
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+    // destroy class
     ~Order(){
         while (head != nullptr){
             Node* temp = head;
@@ -168,7 +217,7 @@ public:
     void AddtoMenu(Item newItem){
         Node* temp = head;
         while(temp != nullptr ){
-            if (temp->data.GetID() != newItem.GetID()) return;
+            if (temp->data.GetID() == newItem.GetID()) return;
             temp = temp->next;
         }
         
@@ -188,10 +237,13 @@ public:
         int id;
         string name;
         long gia;
+        int count = 0;
         while(file >> id >> name >> gia){
             Item newItem(id, name, gia);
             AddtoMenu(newItem);
+            count++;
         }
+        cout << "Da nhap " << count << " mon."<< endl;
         file.close();                                                                                                   
     }
     // Hien thi menu 
@@ -239,6 +291,7 @@ public:
         }
         file.close();
     }
+    
     // Tim mon an theo ID
     Item* GetItembyId(int id){
         Node* temp = head;
@@ -257,28 +310,35 @@ public:
 int main(){
     Order Bill;
     Menu nhahang;
-    nhahang.LoadMenufromFile("Menu.txt");
+    nhahang.LoadMenufromFile("L:\\Luong\\TotalBill\\Menu.txt");
     int option;
     do{
         cout << "\n1. Xem Menu nha hang."
         << "\n2. Chon mon an."
-        <<"\n3.Xoa mon / giam so luong."
+        <<"\n3. Xoa mon / giam so luong."
         <<"\n4. In hoa don. "
         <<"\n0. Thoat bang chon."
         <<"\nChon: ";
+
         cin >> option;
+        if (cin.fail()){
+            cout << " Nhap sai, vui long nhap lai: ";
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
         switch (option){
             case 1:{
-                nhahang.PrintMenu();
+                nhahang.PrintMenu();// In menu nhà hàng
                 break;
             }
             case 2:{
                 int opt;
                 cout << "Nhap ID mon an: ";
                 cin >> opt;
-                Item*  found = nhahang.GetItembyId(opt);
+                Item*  found = nhahang.GetItembyId(opt); // Tìm xem món ăn có trong menu không
                 if (found != nullptr){
-                    Bill.AddFood(*found);
+                    Bill.AddFood(*found); // Hàm thêm mon ăn vào bill
                 } else {
                     cout << " Khong tim thay mon an.";
                 }
@@ -289,11 +349,18 @@ int main(){
 
                 cout << "Vui long nhap mon an:";
                 cin >> opt;
-                Bill.RemoveFood(opt);
+                Bill.RemoveFood(opt); // Hàm để giảm số lượng món trong menu
                 break;
             }
             case 4:{
-                Bill.PrintBill();
+                Bill.PrintBill(); // Hàm in Bill ra màn hình
+                char confirm; 
+                cout << "Ban co muon thanh toan va in hoa don khong? (y/n):";
+                cin >> confirm;
+                if (confirm == 'y' || confirm == 'Y'){
+                    Bill.ExportBillToFile(); // Hàm để in hóa đơn ra file
+                    Bill.ResetOrder(); // Hàm để xóa bill vừa in ra file
+                }
                 break;
             }
             case 101:{
@@ -303,7 +370,7 @@ int main(){
                 cin >> pass;
 
                 if (pass == "oklpassmenu"){
-                    nhahang.Admin_themon();
+                    nhahang.Admin_themon(); // Admin thêm món mới vào trong Menu
                 } else {
                     cout << "Mat khau sai!" << endl;
                 }

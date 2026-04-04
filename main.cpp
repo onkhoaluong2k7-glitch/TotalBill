@@ -174,7 +174,7 @@ public:
     Menu(){
         sqlite3_open("nhahang.db", &db);
         
-        const char* sql = "CREATE TABLE IF NOT EXIST ThucDon (ID INT PRIMARY KEY, TenMon TEXT, Gia INT);";
+        const char* sql = "CREATE TABLE IF NOT EXISTS ThucDon (ID INT PRIMARY KEY, TenMon TEXT, Gia INT);";
 
         sqlite3_exec(db, sql, 0, 0, 0);
     };
@@ -215,10 +215,15 @@ public:
         Item newItem(id, name, gia);
         AddtoMenu(newItem);
         string sql = "INSERT INTO ThucDon (ID, TenMon, Gia) VALUES("
-                    + to_string(id) + ", '" + name + "', " + to_string(gia) + ";";
+                    + to_string(id) + ", '" + name + "', " + to_string(gia) + ");";
 
+        char* thongbaoloi = nullptr;
         // them vao menu trong data
-        sqlite3_exec(db, sql.c_str(), 0, 0, 0);
+        int kq = sqlite3_exec(db, sql.c_str(), 0, 0, &thongbaoloi);
+        if (kq != SQLITE_OK){
+            cout << " LUU THAT BAI! Loi Database: " << thongbaoloi << endl;
+            sqlite3_free(thongbaoloi);
+        }
         cout << " Them mon thanh cong! " << endl;
     }
     // luu du lieu vao file menu.txt
@@ -252,6 +257,7 @@ public:
 int main(){
     Order Bill;
     Menu nhahang;
+    
     nhahang.LoadMenu();
     int option;
     do{

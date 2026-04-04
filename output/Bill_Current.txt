@@ -8,3 +8,12 @@ ID   Ten                 SL      ThanhTien
                                   TONG CONG: 190000 VND
 ===========================================================
             Cam on quy khach - Hen gap lai!                
+================ HOA DON KHACH HANG ================
+ID   Ten                 SL      ThanhTien   
+2    Cafe_Sua_Da         4       100000      
+4    Nuoc_Cam_Ep         4       80000       
+3    Banh_Mi_Sai_Gon     1       30000       
+-----------------------------------------------------------
+                                  TONG CONG: 210000 VND
+===========================================================
+            Cam on quy khach - Hen gap lai!                

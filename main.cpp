@@ -4,6 +4,7 @@
 #include <fstream>
 #include <ctime>
 #include <vector>
+#include "sqlite3.h"
 using namespace std;
 
 
@@ -157,8 +158,15 @@ public:
 class Menu{
 private:
     vector<Item> menu;
+    sqlite3* db;
 public:
-    Menu(){};
+    Menu(){
+        sqlite3_open("nhahang.db", &db);
+        
+        const char* sql = "CREATE TABLE IF NOT EXIST ThucDon (ID INT PRIMARY KEY, TenMon TEXT, Gia INT);";
+
+        sqlite3_exec(db, sql, 0, 0, 0);
+    };
     // Them mon an moi vao menu
     void AddtoMenu(Item newItem){
         for (Item &temp: menu) 
@@ -207,8 +215,11 @@ public:
         // them vao menu tren man hinh
         Item newItem(id, name, gia);
         AddtoMenu(newItem);
+        string sql = "INSERT INTO ThucDon (ID, TenMon, Gia) VALUES("
+                    + to_string(id) + ", '" + name + "', " + to_string(gia) + ";";
+
         // them vao menu trong data
-        SaveMenutoFile("L:\\Luong\\TotalBill\\Menu.txt");
+        sqlite3_exec(db, sql.c_str(), 0, 0, 0);
         cout << " Them mon thanh cong! " << endl;
     }
     // luu du lieu vao file menu.txt
@@ -230,6 +241,10 @@ public:
         for (Item &temp: menu) 
             if (temp.GetID() == id) return &temp;
         return nullptr;
+    }
+    // dong database khi huy class
+    ~Menu(){
+        sqlite3_close(db);
     }
 };
 

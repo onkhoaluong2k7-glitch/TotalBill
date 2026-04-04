@@ -154,6 +154,17 @@ public:
         order.clear();
     }
 };
+int GetData(void* data, int col, char** dulieu, char** nameCol){
+        vector<Item>* menuNhahang = (vector<Item>*) data;
+        int id = stoi(dulieu[0]);
+        string ten = dulieu[1];
+        long gia = stol(dulieu[2]);
+
+        Item newFood(id, ten, gia);
+        menuNhahang->push_back(newFood);
+
+        return 0;
+    }
 // Menu cua nha hang
 class Menu{
 private:
@@ -171,28 +182,16 @@ public:
     void AddtoMenu(Item newItem){
         for (Item &temp: menu) 
             if (temp.GetID() == newItem.GetID()) return;
-        
         menu.push_back(newItem);
         return;
     }
+    
+    
     //Load du lieu menu tu file.
-    void LoadMenufromFile(string filename){
-        ifstream file(filename);
-        if (!file.is_open()){
-            cout << "Khong tim thay file: "<< filename << endl;
-            return;
-        }
-        int id;
-        string name;
-        long gia;
-        int count = 0;
-        while(file >> id >> name >> gia){
-            Item newItem(id, name, gia);
-            AddtoMenu(newItem);
-            count++;
-        }
-        cout << "Da nhap " << count << " mon."<< endl;
-        file.close();                                                                                                   
+    void LoadMenu(){\
+        menu.clear();
+        const char* sql = "SELECT * FROM  ThucDon;";
+        sqlite3_exec(db, sql, GetData, &menu, 0);
     }
     // Hien thi menu 
     void PrintMenu(){
@@ -253,7 +252,7 @@ public:
 int main(){
     Order Bill;
     Menu nhahang;
-    nhahang.LoadMenufromFile("L:\\Luong\\TotalBill\\Menu.txt");
+    nhahang.LoadMenu();
     int option;
     do{
         cout << "\n1. Xem Menu nha hang."
